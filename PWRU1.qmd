@@ -1,0 +1,774 @@
+---
+title: "PWRU1"
+subtitle: "Prüfung ausgewählter Datensets zum Thema Sustainable Finance, im Anwendungsbereich Mining"
+author: "Johannes Quente, Masterstudent der Fachgruppe Geoinformatik, ZHAW"
+execute:
+  echo: false
+  message: false
+  warning: false
+editor: visual
+bibliography: Mastercollection.bib
+date: "Submission Date: 02.09.2023"
+format:
+  plos-html: 
+    mainfont: "times, serif; font-size:14pt; font-style:italics"
+    code-fold: true
+    code-summary: "Show the code"
+    format:
+    code-tools:
+      source: true
+      toggle: true
+      caption: none
+lang: de
+---
+
+```{r}
+# Keine Ausführen der Chunks
+
+# knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
+# Installing Packages
+library(devtools)
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+library(sf)
+library(tidyr)
+library(tmap)
+library(cowplot)
+library(knitr)
+
+library(gapminder)
+library(ggmap) 
+library(devtools)
+library(gganimate)
+```
+
+```{r}
+# Auswahl der Minen
+# loading csv
+
+indo <- read.csv("indonesia_all_mines_10km_bd_fl_eco.csv")
+
+indo_5km <- read.csv("Indonesien_5km.csv")
+
+indo_maus <- read.csv("indonesia_maus.csv")
+
+brazil_5km <- read_csv("brasilien_5km.csv")
+
+congo <- read_csv("Congo_10km.csv")
+
+congo_5km <- read_csv("Congo_5km.csv")
+
+brazil_10km <- read_csv("brazil_10km.csv")
+
+brazil_3km <- read_csv("Brasilien_3km.csv")
+
+brazil_1km <- read_csv("Brasilien_1km.csv")
+
+my_map <- read_sf("global_mines.shp")
+```
+
+# Einleitung {#sec-Einleitung}
+
+Der Verlust der Biodiversität ist voraussichtlich eine der größten Umweltkrisen aller Zeiten und wird Volkswirtschaften und Gesellschaften zum Einsturz bringen. Wenn der Finanzsektor überleben will, muss er jetzt schnell und in großem Umfang handeln (Diane-Laure Arjalies, FT, 13.09.2021).
+
+Um diesem Verlust von Biodiversität zu begegnen, nutzen Wissenschaftler und private Firmen geografische Informationssysteme und Fernerkundungsmethoden, um mithilfe wachsender Verfügbarkeit von Geodaten bessere Umwelt-, Sozial- und Governance-Bewertungen (ESG) und letztlich besser informierte Investitionen zu tätigen, sowie nachhaltig anzupassen @Patterson2022. Hierbei integrieren Vermögensverwalter, Pensionsfonds und andere institutionelle Anleger ESG-Faktoren in ihre Anlageportfolios, welche eine wichtige Quelle für Kapitalströme auf den globalen Finanzmärkten darstellen @Peterdy2022. Bisher gibt es kaum Berichte über Auswirkungen von einzelnen Minen und Minenbetreibern. Die wenigen Daten, welche zur Verfügung stehen, haben Minenbetreiber bisher selbst ermittelt und nur teilweise kommuniziert. Viele Unternehmen berichten daher nicht oder kaum über Umweltvorfälle, welche durch ihre Geschäftstätigkeit verursacht werden. In vielen Ländern ist die unabhängige Überwachung und Berichterstattung durch die Zivilgesellschaft und die Medien eingeschränkt oder sogar behindert @Balcazar2022. Eine transparente Distribution dieser Informationen, kann daher große Auswirkungen auf die nach mehr Nachhaltigkeit und Transparenz strebenden Märkte haben. In den letzten Jahren ist die Bergbauindustrie jedoch mit diesem Mangel an Berichterstattung konfrontiert worden und die zunehmende Bedeutung von Themen wie Nachhaltigkeit, Umweltschutz und Biodiversität, welche zentral für nachhaltiges Management geworden ist, hervorgehoben worden @Adomako2022.
+
+Der Abbau von Ressourcen ist dabei eine uralte menschliche Tradition und wird überall auf der Welt betrieben @Butterman2005. Die Geschichte des Bergbaus ist somit mit positiven als auch mit negativen sozialen, politischen, wirtschaftlichen und ökologischen Auswirkungen verbunden @Ali2006. Die Schweiz ist dabei weltweit die größte Drehscheibe für die Raffination des wertvollen Bergbauguts Gold. Etwa 70% des weltweit geförderten unraffinierten Goldes wird in die Schweiz importiert und dort verarbeitet. Die Schweiz verarbeitet durchschnittlich 70% des weltweiten Goldes und leistet somit den zweitgrößten Beitrag zum schweizer BIP @Panizzutti2012. Schweitzer NGOs, wie Swiss Better Gold Association, Responsible Mining Foundation wurden demnach gegründet um dieser einhergehenden Verantwortung, sozialer, wie umweltwissenschaftlicher Dimension gerecht zu werden @SwissBetterGoldAssociation2022.
+
+Heutzutage erkennen viele Unternehmen Nachhaltigkeitsaspekte als strategisch wichtig an. Immer mehr Investoren verpflichten sich zur Integration von ESG-Daten @Khan2015. Ein wichtiger Forschungsbericht ist somit die Entwicklung von Bewertungsgrundlagen für Investoren, welche Unternehmen, Produkte oder ganze Wirtschaftszweige hinsichtlich ihrer Nachhaltigkeit bewerten. Solche möglichst objektiven Bewertungen des Engagements eines Unternehmens für nachhaltiges Wirtschaften, kurz ESG-Ratings, werden dabei zu einem wichtigen Instrument und sind bisher noch begrenzt @Berg2019. Darüber hinaus gibt es immer mehr Ansätze, um Minen nachhaltiger zu bewirtschaften, zum Beispiel das Rahmenwerk des Green and Climate-Smart Mining (GCSM), mit dem Anspruch, die Umwelt zu schonen, den ökologischen Fußabdruck zu verringern und eine sauberere Mineralproduktion zu fördern @Jiskani2021. Um die Agenda der Vereinten Nationen für nachhaltige Entwicklung bis 2030 zu erreichen, erweisen sich die Bemühungen der Bergbauindustrie, Regierungen und NGOs allerdings bisher als unzureichend, die sozialen, ökologischen und wirtschaftlichen Aspekte einer nachhaltigen Entwicklung miteinander zu verbinden @Moomen2019.
+
+2018 führten Investmentbanken wie J.P. Morgan und Vermögensverwalter wie BlackRock den JESG-Index ein, welcher ESG-Aspekte in zentrale Benchmark-Indizes einbezieht. Nach einem Bericht des Internationalen Währungsfonds, haben Investitionen, welche sich an Benchmark-Indizes orientieren, auf den Märkten für Schwellenländeranleihen rasch zugenommen und belaufen sich 2019 auf rund 300 Milliarden US-Dollar @Arslanalp2015. Ein weiteres Argument für die weitere Integrierung von ESG-Aspekten ist eine verbesserte Nachhaltigkeitsleistung, welche zu geringeren Risiken für die Finanzinstitute führt, die sich auf Fremd- und Eigenkapitalfinanzierung, sowie Versicherungen für die Branche auswirken @MMSD2002.
+
+Dabei ist besonders die Landschaft von der Bergbauindustrie betroffen. Auswirkungen auf die Umwelt-, und Sozialdimension sind Entwaldung, Verlust der biologischen Vielfalt und Umweltverschmutzung @Gulley2017. Somit beeinträchtigt der Tagebau die Landschaft stark und ist weitgehend unumkehrbar. Die Landschaften in Folge eines Lebenszyklus einer Mine unterscheiden sich nach Studien @Larondelle2012 oft deutlich von denen, vor Beginn der Minenaktivität, zu sehen auch in eigenen Stichproben-Erhebungen ([Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457)). Der Bergbau verändert die Wasserverfügbarkeit im Umland, wie auch andere wichtige Ökosystemdienstleistungen. Bemühungen zur Wiederherstellung beschränken sich oft nur auf die Ästhetik der Landschaft @Larondelle2012, eine objektive Analyse bspw. mittels Geodaten und Remote Sensing ist somit sinnvoll und verspricht wichtige Erkenntnisse, nicht nur für den Finanz-Sektor, sondern auch politische Akteure.
+
+Der Forschungsbereich "Sustainable Finance" untersucht unter anderem Methoden der Nachhaltigkeitsevaluierung in der Bergbauindustrie zur weiteren Offenlegung und Transparenzmachung der hierfür zuständigen Unternehmen -- da Unternehmen ihre Daten meist nicht zur Verfügung stellen @Patterson2022. Objektive und überprüfbare Bewertungen der Bergwerk-Aktivitäten fehlen weitgehend. Heute zur Verfügung stehende Geo-, Umwelt-, Sozial- und Verwaltungsdaten können dabei helfen Methoden zur Abschätzung der Umweltauswirkungen von Minenstandorten weltweit zu entwickeln. Eine kombinierte Auswahl skalierbarer und objektiver Methoden ermöglichen es Bergbaustandorte mit raumbezogenen Umwelt-, Sozial- und Verwaltungsdaten zu verknüpfen und auf ihre Nachhaltigkeit zu überprüfen anhand bspw. von Biodiversitäts-Indices, wie Entwaldungsraten verschiedener biodiverser Biome @Patterson2022.
+
+Mineralische Produkte sind für die heutige Gesellschaft und Wirtschaft unverzichtbar. Viele Grundbedürfnisse können ohne sie nicht befriedigt werden. Ein nachhaltigerer Prozess der Gewinnung, der Nutzung und des Recyclings von Mineralien kann dabei der Gesellschaft helfen Umwelt-, sowie soziale Ziele zu erreichen. Bspw. die direkte und indirekte Schaffung von Arbeitsplätzen, die Unterstützung der Entwicklung nationaler Volkswirtschaften und das Erreichen von Energie- und Ressourceneffizienzzielen @MMSD2002.
+
+In der Vergangenheit hat die Bergbauindustrie durch schlechte Abfallentsorgung, fehlende oder mangelhafte Sanierung erhebliche Umweltauswirkungen verursacht und ist somit häufig nachteilig für die Region oder das Land, in welcher der Abbau stattfindet, insbesondere in weniger entwickelten Ländern mit schwachen Strukturen @Hota2019, @Gulley2017. Dies wiederum steht in engem Zusammenhang mit sozialen Auswirkungen und Herausforderungen unterschiedlicher Schwierigkeitsgrade @Mudd2007. Auch auf die folgenden SDGs hat Mining demnach einen Einfluss und ihre Nachhaltigkeitsevaluation daher eine entsprechende Relevanz und globalpolitischen Einfluss:
+
+| Ziele | Nr. | Thema                           |
+|-------|-----|---------------------------------|
+| SDG   | 1   | Poverty                         |
+| SDG   | 6   | Clean Water and Sanitation      |
+| SDG   | 7   | Clean and Affordable Energy     |
+| SDG   | 8   | Decent Work and Economic Growth |
+| SDG   | 14  | Life on Land                    |
+| SDG   | 15  | Life on Water                   |
+| SDG   | 16  | Peace and Justice               |
+
+: SDG Ziele mit Mining Einfluss {#tbl-sdg}
+
+Auch die Aichi-Biodiversitätsziele, englisch: Aichi Biodiversity Targets (ABT), welche bis 2020 gesetzt wurden, schlugen ebenfalls die Eignung von Fernerkundung für die Verfolgung der Fortschritte vor. Besonders die folgenden Indikatoren können so nach @Secades2014 ganz oder teilweise aus bestehenden EO-basierten (Earth Observations) Informationen abgeleitet werden.
+
+| Ziele | Nr. | Thema                                                     |
+|-------|-----|-----------------------------------------------------------|
+| ABT   | 5   | Verlust, Fragmentierung die Degradierung von Lebensräumen |
+| ABT   | 8   | Verringerung der Verschmutzung                            |
+| ABT   | 11  | Geschützte Gebiete                                        |
+| ABT   | 14  | Ökosystem-Dienstleistungen                                |
+
+: Besonders aus EO abzuleitende Aichi-Biodiversitätsziele {#tbl-abt1}
+
+Teilweise aus EO-basierenden Informationen abzuleiten:
+
+| Ziele | Nr. | Thema                                                                    |
+|--------------|--------------|--------------------------------------------|
+| ABT   | 4   | Nachhaltige Produktion und nachhaltiger Verbrauch                        |
+| ABT   | 6   | Nachhaltige Bewirtschaftung der Meeresressourcen                         |
+| ABT   | 7   | Biodiversitätsfreundliche Landwirtschaft, Forstwirtschaft und Aquakultur |
+| ABT   | 9   | Kontrolle von invasiven gebietsfremden Arten                             |
+| ABT   | 10  | Korallenriffe und andere empfindliche Ökosysteme                         |
+| ABT   | 12  | Verhinderung des Aussterbens bedrohter Arten                             |
+| ABT   | 15  | Widerstandsfähigkeit von Ökosystemen                                     |
+
+: Teilweise aus EO abzuleitende Aichi-Biodiversitätsziele {#tbl-abt2}
+
+Es ist von gesellschaftlichem Interesse Methoden zu entwickeln, um diese Indikatoren abzuleiten und breit angelegte, wiederholbare und kostengünstige Messungen durchzuführen @Secades2014. Demnach können Investoren heute bspw. über Satellitenaufnahmen Brände, Methan-ausflussraten und Entwicklungsfortschritte in Echtzeit überwachen @Patterson2022. Daher besteht grundsätzlich ein großer Bedarf an objektiven, wissenschaftlich fundierten Daten für evidenzbasierte, nachhaltige Investitionsentscheidungen, welche die Biodiversitätsveränderungen global abbilden.
+
+Die Arbeit von @Hug2022 trug bisher dazu bei, ein kombiniertes Set von skalierbaren und objektiven Methoden, zu entwickeln, welche es ermöglichen, Bergbaustandorte mit räumlichen Umwelt-, Sozial- und Governance-Daten zu verknüpfen. Hierzu wurden bereits verschiedene Methoden, wie Puffer und Annotation von Verwaltungseinheiten an einer großen Anzahl von Bergbaustandorten für verschiedene Umweltvariablen wie Abholzung in zwei Untersuchungsgebieten in Peru und Westafrika getestet. Speziell wird hier auch die räumliche Ausdehnung der Minen berücksichtigt. Die Ergebnisse zeigen, dass die getesteten Methoden tatsächlich die Integration von Standorten mit Geodaten ermöglichen und nützliche Erkenntnisse liefert.
+
+Weitere Unternehmungen bezüglich der Validierung von Umweltauswirkungen im Bergbausektor belaufen sich auf den Vergleich von Satellitenbildern verschiedener Zeiträume. Sowie der Nutzung von Klassifizierungsalgorithmen zur Quantifizierung von Umweltveränderungen. Auch hochauflösende 3D-Modelle von Teilgebieten wurden bereits erstellt, in welchen Bildverarbeitungs-, sowie Machinelearning-Technologien kombiniert wurden @Patterson2022. Zur Erkenntnisgewinnung aus der Fernerkundung und weiteren Verfeinerung von ESG-Ansätzen mit Geodaten wird insbesondere die Produktion, die abgebauten Gebiete und das abgetragene Material auf der Grundlage einer Kombination aus 3D-Rekonstruktion, SAR Change Detection Index und multispektraler Landbedeckungsanalyse untersucht. Ziel war es bisher, Veränderungen in den Produktionsraten sowie die Ausweitung der Minenaktivitäten und die Auswirkungen auf das umliegende Ökosystem zu erkennen @Patterson2022.
+
+Eine rasche Entwicklung von künstlicher Intelligenz-Technologien in der quantifizierbaren Bildanalyse, sowie die Anpassung dieser Techniken an Satelliten- und Luftbilder, hat zur Gründung einer Reihe von Unternehmen für die Analyse von Weltraumdaten geführt, wie Orbital Insight, Descartes Labs, SpaceKnow und Impact Observatory, sowie weiterer großer Programme zur Erweiterung der Fähigkeiten des maschinellen Lernens in bestehenden Unternehmen für Geodaten-Technologie, z.B. Esri ArcGIS, Maxar GBDX, Planet PlanetScope, Airbus UP42, Google Earth Engine und Microsoft Planetary Computer @Brumby2022.
+
+Impact Observatory hat Deep-Learning-Algorithmen entwickelt, die 10m-Sentinel-2-Bilder nutzen, um dynamische, globale Landnutzungs- und Bodenbedeckungs-Zeitreihendatensätze (LULC) zu erstellen, welche als Entscheidungsgrundlage dienen, um Umweltauswirkungen von bspw. Bergbauaktivitäten zu überwachen. Die Automatisierung ermöglicht eine zeitnahe Aktualisierung der LULC-Karte innerhalb eines Jahres und eine Überwachung nahezu in Echtzeit @Brumby2022.
+
+Ähnliche globale 10m-LULC-Produkte sind von anderen Teams geplant, z. B. dem ESA World Cover-Programm, welche die Google Earth Engine und Microsoft Planetary Computer nutzen. Satellitenbilder, wie denen des Landsat-Satelliten dienen als wichtige Datenquellen @Firozjaei2021. Diese Karten sind von großer Bedeutung für die Identifizierung verbleibender Wildnis Gebiete zur Unterstützung von Planungs- und Managementmaßnahmen. Die Industriepartner von Impact Observatory finanzieren die Entwicklung und Verarbeitung dieser Arbeit, welche der Industrie, dem Finanzwesen und den Regierungen nahezu in Echtzeit und auf Abruf wissenschaftlich fundierte Erkenntnisse liefert. Impact Observatory ermöglicht es, globale LULC- und abgeleitete wissenschaftliche Zeitreihenprodukte als öffentliches Gut jährlich zu veröffentlichen @Brumby2022.
+
+Kleinräumige RS-Untersuchungen Sozialer- und Umweltauswirkungen von Bergwerken, wie @Kahangwa2020 beobachteten LULC-Veränderungen in zwei Bergbaustandorten in Tansania in den Jahren 1997, 2010 und 2017. Eine überwachte Klassifizierung von Landsat-Bildern zeigte, wie Buschland den Wald als vorherrschenden Bedeckungstyp ersetzt hat. @Kamga2020 zeigt die räumlich-zeitlichen Veränderungsmuster von vier verschiedenen LULC zwischen 1987 und 2017 in einer Region im östlichen Teil Kameruns. Die Studie ergab signifikante Veränderungen der LULC wie den Rückgang der natürlichen Vegetation und einen Anstieg der Zahl der Siedlungen als Folge des Goldbergbaus. @Ado2022 bewerteten LULC-Veränderungen in der Zamfara-Sahelzone in Nigeria mit Hilfe von Daten aus Feldforschung und GIS-Archiven. Ihre Studie integrierte erstmals standortspezifische Informationen über die Dynamik von LULC-Veränderungen. @Duran2013 überlagerte die weltweiten Standorte von Minen mit Schutzgebieten. Die Studie zeigte, dass 7 Prozent der von ihnen untersuchten Minen direkt in einem Schutzgebiet liegen und weitere 27 Prozent in einem Puffer von zehn Kilometern um Schutzgebiete herum. @Sonter2018 überlagerte räumlichen Standorte von Minen zudem mit globalen terrestrischen Biomen.
+
+In der Arbeit von @Maus2020 wurde ein neuer Datensatz an Minenpoligonen veröffentlicht, welcher durch die visuelle Interpretation von Satellitenbilder gewonnen wurde. Das Ergebnis: Ein globaler Datensatz, aus 21.060 Polygonen von 57.277 km². Zweck dieser Arbeit ist es, mehrere Ausgewählte Datensätze @Maus2020, S&P, @GlobalForestWatch2019 in ihrer Genauigkeit zu evaluieren und hinsichtlich der Entwicklung von anwendungsorientierten Tools und Methoden zur Bewertung und Überwachung der ESG-Auswirkungen auf und in der Nähe von Minenstandorten zu testen.
+
+## Methodik {#sec-Methodik}
+
+In dieser Arbeit werden Minendaten in vier Case-Studies der Fokusräume (Brasilien, DR Kongo, Indonesien) auf ihre Datengenauigkeit geprüft: Die Minen-Daten stammen von S&P, welche von der Forschungsgruppe zur Verfügung gestellt wurden. Außerdem wird der umfangreiche Datensatz von @Maus2020 für die Arbeit verwendet und exemplarisch auf seine Datenqualität geprüft. Der Entwaldungsdatensatz von @GlobalForestWatch2019 wurde bereits in die S&P Daten eingerechnet und die Ergebnisse mit Satellitenbildern aus verschiedenen Zeiträumen verglichen, siehe [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457). Für die Veränderungen in der Zeitdimension wurde das Programm Google-Earth-Pro verwendet, um zeitliche Veränderungen in der Waldbedeckung und Minenausbreitung zu dokumentieren. Die vorhandenen Daten wurden hiermit auf ihre Plausibilität überprüft. Konkret wurden die @Maus2020 -Polygone und die S&P Punktdaten in die Google Earth Engine im KML-Format eingeladen, um so mittels der zeitlich und qualitativ gut aufgelösten Luftbilder von Google visuell zu vergleichen. Zur besseren Vergleichbarkeit werden sie in [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457) dargestellt und mit den gegebenen Tools nebeneinandergestellt.
+
+Bei den gewählten Minen handelt es sich um eine Auswahl der Länder Brasilien, Demokratische Republik Kongo und Indonesien. Die Auswahl der folgenden vier Minen wurde getätigt, da es sich hierbei um Länder handelt, welche vorwiegend mit Biomen des tropischen Regenwaldes bedeckt sind und die dortige Bergbauaktivität einen relativ gravierenden Einfluss auf die dortige Biodiversität ausübt @Mendenhall2016.
+
+Bezüglich der Entwaldungsdaten von @GlobalForestWatch2019 wurden 5km-Puffer ausgehend der S&P -Datenpunkte von @Hug2022 erstellt. Dieser Pufferradius wurde gewählt, um bekannte Umweltereignisse (@sec-Bento-Rodrigues, @sec-Córrego-do-Feijão) in der Entwaldungs-Analyse zu berücksichtigen.
+
+Bei der Auswahl der Minen werden verschiedene Kriterien beachtet:
+
+-   @Maus2020 -Polygone und S&P Daten sind miteinander verschnitten
+-   Minen befinden sich in den Ländern Brasilien, Demokratische Republik Kongo, oder Indonesien aufgrund der erfassten und zu kontrollierenden Entwaldungsdaten von @GlobalForestWatch2019
+-   Hohe Variablen-Werte, wie größte Minen-Fläche, Höchste Entwaldung (C_0) wurden bevorzugt, um eine möglichst deutliche flächendeckende Umweltveränderung zu evaluieren.
+-   Aktive Minen wurden bevorzugt, um Veränderungen in aktuellen Satellitenbildern feststellen zu können.
+-   Jedes Land verfügt über einen deutlichen Minenhotspot(siehe @fig-density-Casestudy). Die Minensuche wurde in diesen dichten Minenhotspots durchgeführt: Grund hierfür war die hohe Wahrscheinlichkeit Umweltsauswirkungen zu erkennen.
+
+```{r}
+#| label: fig-density-Casestudy
+#| fig-cap: Density Maps der Casestudy Länder
+#| fig-subcap: 
+#|   -  "Brasilien"
+#|   -  "Indonesien"
+#|   -  "Demokratische Republik Congo"
+#| layout-nrow: 1
+  
+
+## Idee Facetwrap aller drei Länder
+
+all_example_countries <- full_join(brazil_10km, indo,
+                           by = c("Country_Name", "Longitude", "Latitude"))
+
+all_example_countries <- full_join(all_example_countries, congo, by = c("Country_Name", "Longitude", "Latitude"))
+
+
+# qmplot(Longitude, Latitude, data = all_example_countries, geom = "density2d") +
+#   facet_wrap(~Country_Name, scales = "free")
+
+qmplot(Longitude, Latitude, data = brazil_10km, geom = "density2d")
+qmplot(Longitude, Latitude, data = indo, geom = "density2d")
+qmplot(Longitude, Latitude, data = congo, geom = "density2d")
+
+
+# cowplot::plot_grid(p1,p2,p3,nrow = 1,align = "h")
+```
+
+-   Minen in Brasilien wurden gewählt, da sie Beispiele für Umweltdesaster darstellen, welche durch Minenaktivität ausgelöst wurden. Deutliche Umweltveränderungen sind in den Satellitenbildern [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457) zu erkennen, sowie medial gut dokumentiert, siehe: @sec-Bento-Rodrigues & @sec-Córrego-do-Feijão).
+
+Das Ziel ist es folgende Fragen zu beantworten: Wie passen die Daten räumlich und zeitlich zueinander? Geben die angegebenen Daten-Zeitpunkte, wie Entwaldung und Projekt-Start plausible Zeitpunkte wieder und sind so auch in den Satellitenbildern zu erkennen? Die folgenden Variablennamen des S&P-Datensatzes wurden nachgeprüft:
+
+-   Primary Commodity
+-   Development Stage
+-   Activity Status
+-   Mine Type
+-   Property Name
+-   Commodities
+-   Koordinaten
+-   List of Owners
+
+## Erkundung der Vollständigkeit der S&P-Daten {#sec-Amelia-Packages}
+
+Hier werden die Daten mittels des Amelia-Packages auf ihre Datenvollständigkeit geprüft. Die Funktion *Missmap* verwendet einen speziellen Algorithmus zur Imputation fehlender Werte, in diesem Fall des S&P-Datensatzes.
+
+```{r}
+## therefore deleting empty columns
+
+indo_amelia <- select(indo, Projected_Start_Up_Year, Projected_Closure_Year, Actual_Closure_Year, List_of_Owners, Owner_Name, Operator_Name, Mining_Methods, Processing_Methods)
+
+brazil_amelia <- select(brazil_10km, Projected_Start_Up_Year, Projected_Closure_Year, Actual_Closure_Year, List_of_Owners, Owner_Name, Operator_Name, Mining_Methods, Processing_Methods)
+
+congo_amelia <- select(congo, Projected_Start_Up_Year, Projected_Closure_Year, Actual_Closure_Year, List_of_Owners, Owner_Name, Operator_Name, Mining_Methods, Processing_Methods)
+```
+
+```{r}
+#| label: fig-Missmap-Brasilien
+#| fig-cap: "Missmap Brasilien S&P-Daten"
+
+Amelia::missmap(brazil_amelia)
+```
+
+Die Missingnesmap zeigt in diesem Fall die Anzahl der fehlenden und vorhandenen Daten in % des S&P Datensatzes für Brasilien. Das Ergebnis zeigt, dass 62 % der abgefragten Daten fehlen.
+
+```{r}
+#| label: fig-Missmap-Indonesien
+#| fig-cap: "Missmap Indonesien S&P-Daten"
+
+Amelia::missmap(indo_amelia)
+```
+
+Die Missingnesmap zeigt in diesem Fall die Anzahl der fehlenden und vorhandenen Daten in % des S&P Datensatzes für Indonesien. Das Ergebnis zeigt eine höhere Auflösung der Daten, mit Ausnahme der Informationen in den Variablen: *Actual_Start_Up_Year*, *Projected_Closure_Year*, *Actual_Closure_Year.* Hier fehlen 34% der abgefragten Daten
+
+```{r}
+#| label: fig-Missmap-Congo
+#| fig-cap: "Missmap Congo S&P-Daten"
+
+Amelia::missmap(congo_amelia)
+```
+
+Die Missingnesmap zeigt in diesem Fall die Anzahl der Fehlenden und Vorhandenen Daten in % des S&P Datensatzes für DR Congo. Das Ergebnis zeigt eine geringere Auflösung der Daten. Hier fehlen 60% der abgefragten Daten. Der Datensatz besteht dabei nur aus 210 Einträgen, ist jedoch vollständiger als @fig-Missmap-Brasilien.
+
+# Brasilien {#sec-Brasilien}
+
+## Brasilien Minen-Hotspot *Minas Gerais*
+
+```{r}
+### Filter nach Minas Gerais
+
+# brazil_hotspot_polygons <- my_map |>
+#   filter(COUNTRY_NA == "Brazil")
+
+brazil_hotspot_points <- brazil_10km |>
+  filter(State_Province == "Minas Gerais")
+```
+
+```{r}
+### Filter der ausgewählten Minen in Brasilien
+
+# As sf Object
+
+brazil_sf <- st_as_sf(brazil_1km, coords = c("Longitude", "Latitude"), crs = 4326)
+
+# bento 
+
+brazil_polygons <- my_map |>
+  filter(COUNTRY_NA == "Brazil")
+
+restl_minen_bento <- brazil_sf |>
+  filter(OBJECTID %in% c(621, 18, 250, 392))
+
+mariana_mine <- brazil_sf |> 
+  filter(OBJECTID == 392)
+```
+
+### Datenexploration der S&P Daten Brasiliens
+
+```{r}
+## ECO_NAME
+# qmplot(Longitude, Latitude, data = brazil_10km, geom = "density2d") +
+#   geom_sf(data = bento_point, inherit.aes = FALSE)
+  # geom_sf_label(aes(label = Property_Name))
+  # qmplot(Longitude, Latitude, data = bento_point)
+```
+
+```{r}
+#| label: fig-Primärrohstoff-Brasilien
+#| fig-cap: "Brasilien Primärrohstoff-Karte der S&P Daten"
+
+
+qmplot(Longitude, Latitude, data = brazil_hotspot_points, color = Primary_Commodity)
+```
+
+Der Primärrohstoff des Minenhotspots Minas Gerais ist Eisenerz, sowie Gold.
+
+```{r}
+#| label: fig-Entwicklung-Brasilien
+#| fig-cap: "Brasilien Entwicklung Stadium-Karte der S&P Minen-Daten"
+
+qmplot(Longitude, Latitude, data = brazil_hotspot_points, color = Development_Stage)
+```
+
+Die Variable *Development_Stage* gibt Informationen über den Zustand der jeweiligen Minen im Bundestaat Minas Gerais. Man kann erkennen, dass die Mehrheit der erfassten Minen im S&P Datensatz in Betrieb sind, bzw. erfasste Probeborungen darstellen (Satellite).
+
+```{r}
+#| label: fig-Aktivitätstatus-Brasilien
+#| fig-cap: "Brasilien Aktivitätstatus-Karte der S&P Minen-Daten"
+
+
+## Wenig Daten zu den Startup years
+qmplot(Longitude, Latitude, data = brazil_10km) +
+  geom_point() +
+  facet_wrap(~Activity_Status)
+```
+
+Hier ist die Datenverteilung der verschiedenen Activitäts-Zustände der Minen visualisiert. Die Mehrheit der Daten beinhaltet Active oder Inaktive Minen. Wobei wenige Daten fehlen (NA) und manche Minen kurzfristig in der Aktivität pausieren.
+
+```{r}
+#| label: fig-Anfangsjahr-Brasilien
+#| fig-cap: "Brasilien Anfangsjahr-Karte der S&P Minen-Daten"
+
+
+qmplot(Longitude, Latitude, data = brazil_10km) +
+    labs(title = 'Start Up Year: {frame}') +
+  transition_manual(Actual_Start_Up_Year, cumulative = TRUE) + labs(title = "Actual Start Up Year: {current_frame}")
+
+```
+
+Es zeigt sich, dass einige Datenpunkte fehlen. Auch suggerieren die Daten eine vermehrte Eröffnung von Minen in den letzten 30 Jahren. Der Datensatz enthält demnach hauptsächlich Datenpunkte der Variable "Actual Start Up Year" der letzten 30 Jahre.
+
+## Medienberichte zum Unglück der Fallbeispiel-Mine *Bento Rodrigues* {#sec-Bento-Rodrigues}
+
+Am 5. November 2015 brachen im Südosten Brasiliens zwei Dämme und schickten eine Flut von Bergbauschlamm durch das Dorf Bento Rodrigues. Die schlammigen Überschwemmungen aus einem Eisenerzabbau zerstörten Hunderte von Häusern, töteten einige Bewohner und ließen andere vermisst zurück @NASA2015. Bei dem Unglück wurden 60 Millionen Kubikmeter Abwasser wurden freigesetzt, von denen der größte Teil Bento Rodrigues betraf @TheWallStreetJournal2015. Städte bis zu 300 Kilometer flussabwärts verloren den Zugang zu Trinkwasser. Die Verantwortung lag bei dem brasilianische Bergbauunternehmen Samarco Mineração, ein Joint Venture zwischen dem brasilianischen Bergbaukonzern Vale und dem britisch-australischen Rohstoffunternehmen BHP Billiton, welche jeweils 50 Prozent der Aktien halten @Reuters2015 und siehe auch (S&P Daten). Mehr als 500 Menschen verloren durch die Schlammlawine ihre Häuser und mehrere hunderttausend wurden von der Trinkwasserversorgung abgeschnitten. Proteste der Anwohner verhinderten bisher eine Wiederinbetriebnahme @NASA2015. Demnach ist das *Projected_Closure_Year* für 2053 nicht mehr aktuell.
+
+Zusammenfassung des Schadens nach: Die Menge an ausgetretenem Schlamm beträgt nach @Russau2017: 32 bis 62 Millionen Kubikmeter. Die Größe des betroffenen Gebiets: 680 Kilometer Flusslauf. Die Schadenshöhe: 5 bis 55 Milliarden USD
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_HKnOVLpTZQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+In diesem Video lassen sich die Ausmaße des Schadens erahnen.
+
+```{r}
+#| label: fig-Interaktiv-Bento
+#| fig-cap: "Interaktive-Karte der S&P und Maus-Daten der Mariana-Mine" 
+
+### filter auf Mine Bento Rodrigues
+
+maus_shape_bento <- brazil_polygons |> 
+filter(fid == 3522)
+
+tmap_mode("view")
+
+tmap_options(check.and.fix = TRUE)
+
+tm_shape(maus_shape_bento) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(restl_minen_bento) +
+  tm_dots() + 
+tm_shape(mariana_mine) +
+  tm_dots(size = 0.1) +
+  tm_basemap(c("Esri.WorldImagery", "Stamen.Toner"))
+```
+
+```{r}
+#| label: fig-entwaldung-bento
+#| fig-cap: "Entwaldungsrate anhand eines 5km Puffers um die Minen und den Daten aus @GlobalForestWatch2019" 
+### Plot mit der Entwaldung, um Plausibilität einzuschätzen
+
+brazil_c <-  brazil_5km |>
+    select(OBJECTID, starts_with("C_")) |>
+    filter(OBJECTID %in% c(621, 18, 250, 392)) |>
+    rename("2001" = C_1, "2002" = C_2, "2003" = C_3, "2004" = C_4, "2005" = C_5, "2006" = C_6, "2007" = C_7, "2008" = C_8, "2009" = C_9, "2010" = C_10, "2011" = C_11, "2012" = C_12, "2013" = C_13, "2014" = C_14, "2015" = C_15, "2016" = C_16, "2017" = C_17, "2018" = C_18, "2019" = C_19, "2020" = C_20) |> 
+    pivot_longer(-OBJECTID) |>
+    group_by(OBJECTID) |>
+    filter(name != "C_0") |>
+    mutate(value_cumulative = cumsum(value))
+ 
+
+  ggplot(brazil_c, aes(as.numeric(name), value_cumulative, color = (as.character(OBJECTID)), fill = OBJECTID)) + 
+  geom_line() +
+    theme_classic() +
+    labs(x = "\n Jahre", y = "Entwaldung in m² \n ") +
+    labs(color = "Object ID") 
+    
+```
+
+### Vergleichende Beschreibung der Daten und der Observation
+
+In diesem Fall liegen vier S&P Minen Punkte innerhalb eines Minenpolygons und ein Punkt außerhalb davon. Eine genaue Zuordnung zu den @Maus2020 -Polygonen ist daher erst nach einiger Internetrecherche (Medienartikel) möglich. Alle Minen sind allerdings zugehörig zu einem Konzern: Samarco Mineração S.A.. Wie sich aus dem Vergleich der Variable *Actual_Start_Up_Year* erkennen lässt, sind die Minen alle unterschiedlichen zeitlichen Ursprungs. Daher stellt der Datensatz ebenfalls eine historische Dimension dar und es werden Minen aufgeführt, welche in späteren Jahren miteinander zusammengeführt, bzw. aufgekauft wurden.
+
+-   Die Entwaldungsdaten @fig-entwaldung-bento zeigen eine langsam steigende Entwaldung bis ca. 2015. Besonders die Entwaldung der südlichen Minen (inkl. @tbl-abt-Mariana) verdoppelt sich 2015 - 2017. Ein Zusammenhang mit dem Dammbruch @sec-Bento-Rodrigues ist realistisch.
+-   Laut Medienberichten muss das *Closure_Year* daher falsch sein, da am 9. November 2015 der offizielle Zeitpunkt der Schließung, aufgrund des Unglücks bestimmt wurde.
+-   Die @Maus2020 -Polygone sind aktuell (Juni 2022)
+-   Das *Projected_Closure_Years* ist für 2038 angesetzt und daher nicht mehr aktualisiert worden.
+-   Bestätigt werden konnte durch Satellitenvergleichen der Minenstart vor 1984, siehe [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457)
+-   In der folgenden Tabelle lassen sich die Informationen der vier Minen vergleichen. In diesem Beispiel ist die Datenqualität sehr hoch, sowie homogen. Historisch sind die vier Minen zusammengewachsen, welches das zusammenhängende @Maus2020 -Polygon erklärt. Es zeigt sich, dass @Maus2020 keinen Unterschied in der Zugehörigkeit, bzw. der Eigentumsrechte macht.
+
+| Type of Information                      | Mine: Mariana               | Mine: Fabrica Nova            | Mine: Alegria                 | Mine: Samarco                                              |
+|---------------|---------------|---------------|---------------|---------------|
+| brazil_all_mines:OBJECTID                | 392                         | 250                           | 18                            | 621                                                        |
+| brazil_all_mines:Property_Name           | Mariana                     | Fabrica Nova                  | Alegria                       | Samarco                                                    |
+| brazil_all_mines:Property_ID             | 50230                       | 74749                         | 74748                         | 31893                                                      |
+| brazil_all_mines:Primary_Commodity       | Iron Ore                    | Iron Ore                      | Iron Ore                      | Iron Ore                                                   |
+| brazil_all_mines:Development_Stage       | Operating                   | Satellite                     | Satellite                     | Operating                                                  |
+| brazil_all_mines:Activity_Status         | Active                      | Active                        | Active                        | Under Litigation                                           |
+| brazil_all_mines:Mine_Type1              | Open Pit                    | Open Pit                      | Open Pit                      | Open Pit                                                   |
+| brazil_all_mines:Property_Name1          | Mariana                     | Fabrica Nova                  | Alegria                       | Samarco                                                    |
+| brazil_all_mines:Commodity_1             | Iron Ore                    | Iron Ore                      | Iron Ore                      | Iron Ore                                                   |
+| brazil_all_mines:Country_Name            | Brazil                      | Brazil                        | Brazil                        | Brazil                                                     |
+| brazil_all_mines:Global_Region           | Latin America and Caribbean | Latin America and Caribbean   | Latin America and Caribbean   | Latin America and Caribbean                                |
+| brazil_all_mines:State_Province          | Minas Gerais                | Minas Gerais                  | Minas Gerais                  | Minas Gerais                                               |
+| brazil_all_mines:List_of_Owners          | Vale S.A. (Owner) 100%      | Vale S.A. (Owner) 100%        | Vale S.A. (Owner) 100%        | BHP Group Limited (Venturer) 50%; Vale S.A. (Venturer) 50% |
+| brazil_all_mines:Owner_Name              | Vale S.A.                   | Vale S.A.                     | Vale S.A.                     | BHP Group Limited                                          |
+| brazil_all_mines:Owner_HQ                | Rio de Janeiro              | Rio de Janeiro                | Rio de Janeiro                | Melbourne                                                  |
+| brazil_all_mines:Owner_Address           | Praia de Botafogo 186       | Praia de Botafogo 186         | Praia de Botafogo 186         | 171 Collins Street                                         |
+| brazil_all_mines:Operator_Name           | Vale S.A.                   | Vale S.A.                     | Vale S.A.                     | Samarco Mineração S.A.                                     |
+| brazil_all_mines:Actual_Start_Up_Year    | 1976                        | 2005                          | 1992                          | 1977                                                       |
+| brazil_all_mines:Projected_Start_Up_Year | NA                          | NA                            | NA                            | NA                                                         |
+| brazil_all_mines:Projected_Closure_Year  | 2038                        | 2040                          | 2033                          | 2053                                                       |
+| brazil_all_mines:Actual_Closure_Year     | NA                          | NA                            | NA                            | NA                                                         |
+| brazil_all_mines:Mining_Methods          | Open Pit                    | Open Pit                      | Open Pit                      | Open Pit                                                   |
+| brazil_all_mines:Processing_Methods      | Crushing                    | Crushing, Flotation, Grinding | Crushing, Flotation, Grinding | Crushing, Flotation, Grinding                              |
+
+: S&P Daten der Mariana-Mine in Brasilien {#tbl-abt-Mariana}
+
+```{r}
+### Möglicher Zusatz: Auswirkungen auf die weitläufige Umwelt?
+
+# - Karte mit zwei Koordinaten? Um Entfernung zu vermitteln?
+# - Umweltauswirkungen Rio Doce am 24.11.2015
+# - https://earthobservatory.nasa.gov/images/87083/contaminated-rio-doce-water-flows-into-the-atlantic
+```
+
+## Medienberichte zum Unglück der Fallbeispiel-Mine *Córrego do Feijão* {#sec-Córrego-do-Feijão}
+
+Am 25. Januar 2019 brach eine Stützmauer am Rande eines Teichs mit schlammartigem Abfallmaterial aus einer brasilianischen Mine plötzlich zusammen. Der Einsturz in der Mine Córrego do Feijão im südöstlichen Bundesstaat Minas Gerais setzte eine Flut von Abraum frei, welche Gebäude und einen Bus überrollte, sowie nahe gelegene Häuser überschwemmte @NASA2019. Die Abraummassen ergossen sich über die Mine, die nahe gelegene Stadt Brumadinho und den Paraopeba-Fluss, welche eine wichtige Quelle für Trink- und Bewässerungswasser für die Menschen in der Region darstellt. Es kamen mehr als 100 Menschen ums Leben @BBC2019. Über 11,7 Millionen Kubikmeter Abfallmaterial wurden in dem Becken zurückgehalten, nach dem Zusammenbruch waren die Schlammablagerungen flussabwärts an einigen Stellen bis zu 5 Meter dick @NASA2019.
+
+### Ansicht der Mine *Córrego do Feijão*
+
+```{r}
+#| label: fig-Interaktiv-Corrego
+#| fig-cap: "Interaktive-Karte der S&P und Maus-Daten der Corrego do Feijao-Mine" 
+
+### filter auf Mine Córrego do Feijão
+
+andere_minen_bei_corrego <- brazil_sf |>
+  filter(OBJECTID %in% c(209, 165, 336, 496, 318))
+
+corrego_mine <- andere_minen_bei_corrego |> 
+  filter(OBJECTID == 209)
+
+corrego_polygon <- brazil_polygons |> 
+filter(fid == 3534)
+
+tmap_mode("view")
+
+tmap_options(check.and.fix = TRUE)
+
+tm_shape(corrego_polygon) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(andere_minen_bei_corrego) +
+  tm_dots() + 
+tm_shape(corrego_mine) +
+  tm_dots(size = 0.1) +
+  tm_basemap(c("Esri.WorldImagery", "Stamen.Toner"))
+```
+
+```{r}
+#| label: fig-entwaldung-corrego
+#| fig-cap: "Entwaldungsrate der Mine Corrego do Feijao anhand eines 5km Puffers um die Minen und den Daten aus @GlobalForestWatch2019" 
+
+### Plot mit der Entwaldung, um Plausibilität einzuschätzen
+
+brazil_c <-  brazil_5km |>
+    select(OBJECTID, starts_with("C_")) |>
+    filter(OBJECTID %in% c(209, 165, 336, 496, 318)) |>
+   rename("2001" = C_1, "2002" = C_2, "2003" = C_3, "2004" = C_4, "2005" = C_5, "2006" = C_6, "2007" = C_7, "2008" = C_8, "2009" = C_9, "2010" = C_10, "2011" = C_11, "2012" = C_12, "2013" = C_13, "2014" = C_14, "2015" = C_15, "2016" = C_16, "2017" = C_17, "2018" = C_18, "2019" = C_19, "2020" = C_20) |> 
+    pivot_longer(-OBJECTID) |>
+    group_by(OBJECTID) |>
+    filter(name != "C_0") |>
+    mutate(value_cumulative = cumsum(value))
+ 
+
+  ggplot(brazil_c, aes(as.numeric(name), value_cumulative, color = (as.character(OBJECTID)), fill = OBJECTID)) + 
+  geom_line() +
+    theme_classic() +
+    labs(x = "\n Jahre ", y = "Entwaldung in m² \n ") +
+    labs(color = "Object ID")
+```
+
+### Vergleichende Beschreibung der Daten und der Observation
+
+Auch hier liegen 3 S&P Minen-Punkte innerhalb des Minenpolygons und zwei Punkte direkt angrenzend außerhalb. Eine genaue Zuordnung ist hier einfacher. Allerding sind alle Minen zugehörig zu einem Konzern: *Samarco Mineração S.A.*
+
+-   Die Entwaldungsdaten @fig-entwaldung-corrego zeigen eine konstant steigende Entwaldung seit 2001. Die Entwaldung je Mine ist praktisch identisch, bis auf die Jahre 2018-2020. Ein Zusammenhang mit dem Dammbruch @sec-Córrego-do-Feijão ist realistisch.
+-   Laut den Daten ist die Mine lediglich 12 Jahre in Betrieb gewesen, welches dem Ausmaß der Mine nicht entspricht.
+-   Laut den Daten ist ebenfalls das Unglück drei Jahre nach Schließung der Mine in Kraft getreten.
+-   Der Minenstart 2003 kann nicht bestätigt werden.
+-   Im Vergleich mit @Maus2020 aus dem Jahr 2020 ist mittlerweile eine, geringfügig weitere Expansion erfolgt, siehe [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457).
+-   Die folgende Tabelle zeigt relevante S&P Einträge der fünf Minen im ausgewählten Standort. Die Minen haben teilweise sehr unterschiedliche Informationen, teilen sich jedoch ein @Maus2020 -Polygon, bzw. liegen außerhalb dessen.
+-   Sie teilen dieselbe Information der *Primary_Commodity*, enthalten jedoch unterschiedliche Informationen über *Development_Stage* und *Activity_Status*.
+-   Teilweise fehlen alle Zeitdaten, sowie die Daten *Mine_Type*, *Mining_Methods* & *Processing_Methods*.
+-   Die Mine *Carrapato* liegt außerhalb des Polygons, stellt die einzige aktive Mine des Perimeters dar, gehört nach S&P zur Larf Consultoria Ltda. und enthält kaum Informationen über das Abbaugeschehen.
+
+| Type of Information     | Mine: Corrego do Feijao       | Mine: Carrapato                                     | Mine: Itaminas              | Mine: Jangada               | Mine: Paraopeba             |
+|------------|------------|------------|------------|------------|------------|
+| OBJECTID                | 209                           | 165                                                 | 318                         | 336                         | 496                         |
+| Property_Name           | Corrego do Feijao             | Carrapato                                           | Itaminas                    | Jangada                     | Paraopeba                   |
+| Primary_Commodity       | Iron Ore                      | Iron Ore                                            | Iron Ore                    | Iron Ore                    | Iron Ore                    |
+| Development_Stage       | Satellite                     | Target Outline                                      | Operating                   | Satellite                   | Operating                   |
+| Activity_Status         | Temporarily On Hold           | Active                                              | Inactive                    | Temporarily On Hold         | Temporarily On Hold         |
+| Mine_Type1              | Open Pit                      |                                                     |                             | Open Pit                    | Open Pit                    |
+| Country_Name            | Brazil                        | Brazil                                              | Brazil                      | Brazil                      | Brazil                      |
+| Global_Region           | Latin America and Caribbean   | Latin America and Caribbean                         | Latin America and Caribbean | Latin America and Caribbean | Latin America and Caribbean |
+| State_Province          | Minas Gerais                  | Minas Gerais                                        | Minas Gerais                | Minas Gerais                | Minas Gerais                |
+| List_of_Owners          | Vale S.A. (Owner) 100%        | Larf Consultoria e Administracao Ltda. (Owner) 100% | NA                          | Vale S.A. (Owner) 100%      | Vale S.A. (Owner) 100%      |
+| Owner_Name              | Vale S.A.                     | Larf Consultoria E Administracao Ltda               |                             | Vale S.A.                   | Vale S.A.                   |
+| Actual_Start_Up_Year    | 2003                          | NA                                                  | NA                          | 2001                        | 2001                        |
+| Projected_Start_Up_Year | NA                            | NA                                                  | NA                          | NA                          | NA                          |
+| Projected_Closure_Year  | 2015                          | NA                                                  | NA                          | 2027                        | 2042                        |
+| Actual_Closure_Year     | NA                            | NA                                                  | NA                          | NA                          | NA                          |
+| Mining_Methods          | Open Pit                      |                                                     | Magnetic Separation         | Open Pit                    | Open Pit                    |
+| Processing_Methods      | Crushing, Flotation, Grinding |                                                     |                             |                             | Crushing                    |
+
+: S&P Daten der Corrego do Feijao-Mine in Brasilien {#tbl-abt-Corrego}
+
+# Indonesien {#sec-Indonesien}
+
+```{r}
+# qmplot(Longitude, Latitude, data = indo_maus, geom = "density2d")
+```
+
+## Datenexploration der S&P Daten Indonesiens
+
+```{r}
+#| label: fig-Activity_Status-indo
+#| fig-cap: "Indonesiens S&P Daten der Minenaktivität" 
+qmplot(Longitude, Latitude, data = indo_maus) +
+  facet_wrap(~Activity_Status)
+```
+
+Hier wird die Datenverteilung der verschiedenen Aktivitäts-Zustände der Minen visualisiert. In diesem Fall dient eine aktive Mine als Case Study. Die Mehrheit der Daten beinhaltet Aktive oder Inaktive Minen.
+
+```{r}
+#| label: fig-Primary_Commodity-indo
+#| fig-cap: "Indonesiens S&P Daten der Minen-Primärrohstoffe" 
+qmplot(Longitude, Latitude, data = indo, color = Primary_Commodity)
+```
+
+Es zeigt sich ein deutlicher Trend der *Primary_Commodity* anhand der Regionen Indonesiens. Der Minenhotspot @fig-density-Casestudy besteht sichbar hauptsächlich aus Kohle Minen. Wobei der nähere Untersuchungsraum einen deutlichen Nickel-Schwerpunkt aufweist.
+
+```{r}
+#| label: fig-Actual_Start_Up_Year-indo
+#| fig-cap: "Indonesiens Anfangsjahr-Karte der S&P Minen-Daten"
+qmplot(Longitude, Latitude, data = indo_maus) +
+    labs(title = 'Start Up Year: {frame}') +
+  transition_manual(Actual_Start_Up_Year, cumulative = TRUE) + labs(title = "Actual Start Up Year: {current_frame}")
+```
+
+Hier zeigt sich deutlich, dass viele Datenpunkte fehlen. Die Daten suggerieren eine vermehrte Eröffnung von Minen in den letzten 30 Jahren. Dies ist vermutlich lediglich der Datenqualität geschuldet und es wurden vermehrt in letzten 30 Jahren Datenpunkte (Neue Minen) dem Datensatz hinzugefügt.
+
+## *Timah* Nickel Mine Indonesien {#sec-Timah-Nickel}
+
+```{r}
+#| label: fig-Interaktiv-timah
+#| fig-cap: "Interaktive-Karte der S&P und Maus-Daten der Timah-Mine" 
+indo_sf <- st_as_sf(indo, coords = c("Longitude", "Latitude"), crs = 4326)
+
+indo_poligon <- my_map |> 
+  filter(COUNTRY_NA == "Indonesia")
+
+timah_mine <- indo_sf |> 
+  filter(OBJECTID == "523")
+
+timah_shapes <- indo_poligon |>
+  filter(fid %in% c(4318,4312,4313,4310,4315, 4317, 4316, 4307, 4308))
+
+
+## Zeigen der Maus Poligone und der S&P Daten in einer interaktiven Karte
+
+tmap_mode("view")
+
+   tm_shape(timah_shapes) +
+  tm_polygons(alpha = 0.5) +
+  tm_shape(timah_mine) +
+  tm_dots(size = 0.1) +
+     tm_basemap(c("Esri.WorldImagery", "Stamen.Toner"))
+```
+
+```{r}
+#| label: fig-entwaldung-timah
+#| fig-cap: "Entwaldungsrate anhand eines 5km Puffers um die Minen und den Daten aus @GlobalForestWatch2019"
+
+### Plot mit der Entwaldung, um Plausibilität einzuschätzen
+indo_c <-  indo_5km |>
+    select(OBJECTID, starts_with("C_")) |>
+    filter(OBJECTID == 523) |>
+   rename("2001" = C_1, "2002" = C_2, "2003" = C_3, "2004" = C_4, "2005" = C_5, "2006" = C_6, "2007" = C_7, "2008" = C_8, "2009" = C_9, "2010" = C_10, "2011" = C_11, "2012" = C_12, "2013" = C_13, "2014" = C_14, "2015" = C_15, "2016" = C_16, "2017" = C_17, "2018" = C_18, "2019" = C_19, "2020" = C_20) |> 
+    pivot_longer(-OBJECTID) |>
+    group_by(OBJECTID) |>
+    filter(name != "C_0") |>
+    mutate(value_cumulative = cumsum(value))
+ 
+
+  ggplot(indo_c, aes(as.numeric(name), value_cumulative, color = (as.character(OBJECTID)), fill = OBJECTID)) + 
+  geom_line() +
+    theme_classic() +
+    labs(x = "\n Jahre", y = "Entwaldung in m² \n ") +
+    labs(color = "Object ID")
+```
+
+### Vergleichende Beschreibung der Daten und der Observation
+
+-   Der Datensatz besteht aus einem S&P Punkt, sowie mehreren @Maus2020 -Polygonen.
+-   Die Entwaldungsdaten @fig-entwaldung-timah zeigen eine konstant steigende Entwaldung seit 2001, die [Satellitenbilder](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457) bestätigen diese Werte
+-   Die @Maus2020 -Daten stammen vermutlich ca. aus dem Jahr 2014
+-   Die Angabe des *Actual_Start_Up_Year* aus 2015 ist daher nicht ganz korrekt
+-   Der *Activity_Status* "Active" ist korrekt
+-   Die mittlerweile relativ weiträumige Expansion (Im Vergleich zu den @Maus2020 -Polygonen) erfolgte bis einschließlich 2022, siehe [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457)
+
+| Type of Information                      | Information               |     |
+|------------------------------------------|---------------------------|-----|
+| Indonesien_mines:OBJECTID                | 524                       |     |
+| Indonesien_mines:Property_Name           | Timah Nickel              |     |
+| Indonesien_mines:Property_ID             | 77256                     |     |
+| Indonesien_mines:Primary_Commodity       | Nickel                    |     |
+| Indonesien_mines:Development_Stage       | Operating                 |     |
+| Indonesien_mines:Activity_Status         | Active                    |     |
+| Indonesien_mines:Property_Name1          | Timah Nickel              |     |
+| Indonesien_mines:Commodity_1             | Nickel                    |     |
+| Indonesien_mines:Country_Name            | Indonesia                 |     |
+| Indonesien_mines:Global_Region           | Asia-Pacific              |     |
+| Indonesien_mines:State_Province          | Sulawesi Tenggara         |     |
+| Indonesien_mines:List_of_Owners          | PT TIMAH Tbk (Owner) 100% |     |
+| Indonesien_mines:Owner_Name              | PT TIMAH Tbk              |     |
+| Indonesien_mines:Operator_Name           | PT TIMAH Tbk              |     |
+| Indonesien_mines:Actual_Start_Up_Year    | 2015                      |     |
+| Indonesien_mines:Projected_Start_Up_Year | NA                        |     |
+| Indonesien_mines:Projected_Closure_Year  | NA                        |     |
+| Indonesien_mines:Actual_Closure_Year     | NA                        |     |
+
+: S&P Daten der Timah-Mine in Indonesien {#tbl-abt-Timah}
+
+# Demokratischen Republik Congo {#sec-Demokratischen-Republik-Congo}
+
+```{r}
+# qmplot(Longitude, Latitude, data = congo, geom = "density2d")
+```
+
+## Datenexploration der S&P Daten DR Congo
+
+```{r}
+#| label: fig-Aktivitätstatus-indo
+#| fig-cap: "Indonesiens Aktivitätstatus-Karte der S&P Minen-Daten"
+
+qmplot(Longitude, Latitude, data = congo, color = Activity_Status)
+```
+
+Die Mehrheit der Minen in dem S&P Datensatz ist Inaktiv. Die Minen im Minen-Hotspot sind zu ungefähr zu gleichen Teilen aktiv, wie inaktiv.
+
+```{r}
+#| label: fig-Actual_Start_Up_Year-congo
+#| fig-cap: "DR Congo Anfangsjahr-Karte der S&P Minen-Daten"
+qmplot(Longitude, Latitude, data = congo) +
+    labs(title = 'Start Up Year: {frame}') +
+  transition_manual(Actual_Start_Up_Year, cumulative = TRUE) + labs(title = "Actual Start Up Year: {current_frame}")
+```
+
+In diesem Plot lässt sich erkennen, dass die Daten sehr lückenhaft sind und wenige Minen-Daten zum *Actual_Start_Up_Year* enthalten.
+
+## *Kamoto*-Kupfermine
+
+Die Kamoto-Kupfermine liegt in der Nähe von Kolwezi, Kongo (Kinshasa), @fig-Interaktiv-congo. Nach @Dixon2009 wurde der Standort erstmals 1940 entdeckt. Die Kamoto-Kupfermine ist ein Untertage-Bergbaubetrieb. Die erste Produktion fand 1950 statt. Zu den unterirdischen Anlagen gehören 5 Schächte und 2 Stollen. Der Bergbau läuft nach einem kombinierten Verfahren. Der Standort stellt die größte aktive Kobaltmine der Welt dar. Die Abbaurechte gehören der Kamoto Copper Company (KCC), einem Joint Venture zwischen Katanga Mining (75 %) und dem staatlichen Unternehmen Gécamines (25 %). Gécamines nahm 1969 den Betrieb der Kamoto-Untertagemine auf. In den 1980er Jahren produzierte das Bergwerk jährlich drei Millionen Tonnen Erz. Eine Schließung fand im Oktober 1990 statt. Im November 2006 bestätigte eine Machbarkeitsstudie eine Wiedereröffnung. Im April 2018 beantragte Gécamines die Auflösung des Joint Ventures, welches die Kamoto-Mine betreibt. Dies wurde den Schulden in Höhe von über 9 Mrd. USD begründet, welche die Mine bei Glencore und seinen Tochtergesellschaften hatte. Im November 2018 wurde der Bergbau in Kamoto vorübergehend eingestellt, da in den Vorräten Radioaktivität festgestellt wurde.
+
+```{r}
+#| label: fig-Interaktiv-congo
+#| fig-cap: "Interaktive-Karte der S&P und Maus-Daten der Kamoto-Mine" 
+### Filter auf Kamoto Mine und interaktives Zeigen der Daten
+
+
+kamoto_sf <- st_as_sf(congo, coords = c("Longitude", "Latitude"), crs =4326)
+
+andere_minen <- kamoto_sf |> 
+  filter(OBJECTID %in% c(59, 18, 24, 31, 54, 178, 109, 60, 154, 108, 65))
+
+kamoto_mine <- kamoto_sf |> 
+  filter(OBJECTID == 59)
+
+congo_poligon <- my_map |> 
+  filter(COUNTRY_NA == "Democratic Republic of The Congo")
+
+kamoto_poligon <- congo_poligon |> 
+  filter(fid == "4357")
+
+  tm_shape(kamoto_poligon) +
+  tm_polygons(alpha = 0.5) +
+    tm_shape(andere_minen) +
+  tm_dots() +
+tm_shape(kamoto_mine) +
+  tm_dots(size = 0.1) +
+    tm_basemap(c("Esri.WorldImagery", "Stamen.Toner"))
+
+  
+```
+
+```{r}
+#| label: fig-entwaldung-kamoto
+#| fig-cap: "Entwaldungsrate anhand eines 5km Puffers um die Minen und den Daten aus @GlobalForestWatch2019"
+### Plot mit der Entwaldung, um Plausibilität einzuschätzen
+
+congo_c <-  congo_5km |>
+    select(OBJECTID, starts_with("C_")) |>
+    filter(OBJECTID %in% c(59, 18, 24, 31, 54, 178, 109, 60, 154, 108, 65)) |>
+rename("2001" = C_1, "2002" = C_2, "2003" = C_3, "2004" = C_4, "2005" = C_5, "2006" = C_6, "2007" = C_7, "2008" = C_8, "2009" = C_9, "2010" = C_10, "2011" = C_11, "2012" = C_12, "2013" = C_13, "2014" = C_14, "2015" = C_15, "2016" = C_16, "2017" = C_17, "2018" = C_18, "2019" = C_19, "2020" = C_20) |> 
+    pivot_longer(-OBJECTID) |>
+    group_by(OBJECTID) |>
+    filter(name != "C_0") |>
+    mutate(value_cumulative = cumsum(value))
+ 
+
+  ggplot(congo_c, aes(as.numeric(name), value_cumulative, color = (as.character(OBJECTID)), fill = OBJECTID)) + 
+  geom_line() +
+    theme_classic() +
+    labs(x = "\n Jahre", y = "Entwaldung in m² \n ") +
+    labs(color = "Object ID")
+```
+
+### Vergleichende Beschreibung der Daten und der Observation
+
+Auch hier liegen sieben S&P Minen Punkte innerhalb des Minenpolygons und vier Punkte direkt angrenzend außerhalb. Eine genaue Zuordnung ist demnach erst durch eine Recherche möglich gewesen. Nicht alle Minen sind zugehörig zu einem Konzern. Jedoch ist der Konzern Glencore plc und die Republik Congo als Venturer meist vertreten.
+
+-   Die Entwaldungsdaten @fig-entwaldung-kamoto zeigen eine höhrere Entwaldung im Süd-Westen der Minenregion, die Satellitenbilder bestätigen diese Werte
+-   Das *Closure Year* 1990 bestätigt sich in der Recherche.
+-   Die 2006 bestätigte Wiedereröffnung stimmt nicht exakt mit den S&P Daten überein (2007)
+-   Die 2018 entschiedene Schließung findet keine Erwähnung in den S&P Daten
+-   Die @Maus2020 -Daten bilden nicht den exakten Umfang der Mine aus dem Jahr 2022 ab.
+-   Mittlerweile erfolgte eine geringfügig weitere Expansion, siehe [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457)
+
+| Type of Information                 | Information                                                                                       |     |
+|-------------------|----------------------------------|-------------------|
+| congo_mines:OBJECTID                | 59                                                                                                |     |
+| congo_mines:Property_Name           | Kamoto                                                                                            |     |
+| congo_mines:Primary_Commodity       | Copper                                                                                            |     |
+| congo_mines:Development_Stage       | Operating                                                                                         |     |
+| congo_mines:Activity_Status         | Active                                                                                            |     |
+| congo_mines:Mine_Type1              | Open Pit                                                                                          |     |
+| congo_mines:Property_Name1          | Kamoto                                                                                            |     |
+| congo_mines:Commodity_1             | Copper                                                                                            |     |
+| congo_mines:Commodity_2             | Cobalt                                                                                            |     |
+| congo_mines:Global_Region           | Africa                                                                                            |     |
+| congo_mines:State_Province          | Lualaba                                                                                           |     |
+| congo_mines:List_of_Owners          | Glencore plc (Venturer) 75%; Gécamines SA (Venturer) 25%                                          |     |
+| congo_mines:Owner_Name              | Glencore plc                                                                                      |     |
+| congo_mines:Actual_Start_Up_Year    | 2007                                                                                              |     |
+| congo_mines:Projected_Start_Up_Year | 2007                                                                                              |     |
+| congo_mines:Projected_Closure_Year  | 2041                                                                                              |     |
+| congo_mines:Actual_Closure_Year     | 1990                                                                                              |     |
+| congo_mines:Mining_Methods          | Long Hole Stoping, Open Pit, Room & Pillar, Tailings                                              |     |
+| congo_mines:Processing_Methods      | Crushing, Flotation, Leach, Roasting, Semi-Autogenous Grinding, Solvent-Extraction Electrowinning |     |
+
+: S&P Daten der Kamoto-Mine in der Demokratischen Republik Congo {#tbl-abt-Kamoto}
+
+# Fazit
+
+Die S&P Koordinaten, der in dieser Arbeit untersuchten Minen waren sehr genau und ergaben in den vier Casestudies praktisch keine Abweichungen. Ungenauigkeiten und geringe Aktualisierungsraten der Daten konnten in der Variable *Projected_Closure_Year* und *Actual_Closure_Year* nachgewiesen werden. Besonders die Daten bezüglich der Variablen *Actual_Start_Up_Year*, *Projected_Closure_Year* und *Actual_Closure_Year* fehlten häufiger, sowie andere Variablen (siehe @sec-Amelia-Packages). Die Datenqualität der Länder variiert dabei stark, besonders in Indonesien ist die Datenqualität hoch, es fehlen nur teilweise die Zeitdaten. Die @Maus2020 -Daten sind relativ präzise, bilden jedoch keine Minenausbreitung seit 2020 ab, siehe @sec-Indonesien. Einige Minen haben sich seither weiter über die Polygone hinaus ausgebreitet, da es sich hierbei um aktive Minen handelt und die Polygone mehrheitlich aus dem Jahre 2020 stammen. Siehe zum Vergleich: [Storymap](https://storymaps.arcgis.com/stories/d61251085237468db8c823735c510457). Historisch sind Minen zusammengewachsen, welches die @Maus2020 -Polygone erklärt, welche mehrere S&P-Koordinaten enthalten. Es zeigt sich, dass @Maus2020 verschiedene Minen in einem Polygon zusammenlegt, unabhängig von Eigentumsrechten. Diese Minen sind teilweise sehr heterogen in ihren S&P Daten, siehe @tbl-abt-Corrego.
+
+Die Visualisierung der Entwaldungsdaten konnte systematische Zusammenhänge der Minenunfälle @sec-Bento-Rodrigues & @sec-Córrego-do-Feijão und der Entwaldungsdaten, nach @GlobalForestWatch2019 aufzeigen: siehe @fig-entwaldung-bento & @fig-entwaldung-corrego. Zusammenfassend weisen die Daten grundsätzlich eine hohe Datengenauigkeit auf. Hinsichtlich zeitlicher Variablen (*Actual_Start_Up_Year*, *Projected_Closure_Year*, *Actual_Closure_Year*) lässt sich ein deutlicher Länderunterschied feststellen, @sec-Amelia-Packages. Auch sind die zeitlichen Variablen nicht immer aktuell und können daher nur mit vorheriger Recherche sicher verwendet werden, beziehungsweise benötigen eine manuelle Aktualsierung. Darüber hinaus ist der S&P-Datensatz ebenfalls als historisches Dokument zu interpretieren und ermöglicht es, die zeitliche Umstruktuierungen von Minen und deren Eigentümer im Zusammenhang von Satellitenbildern nachzuvollziehen. Um eine generelle Aussage hinsichtlich der länderspezifischen Datenqualität zu machen, ist die Stichprobengröße nicht ausreichend groß. Brauchbare Satellitenbilder für eine Rückverfolgung sind erst ab 1984 verfügbar, wobei einige Minen bereits vorher eröffnet wurden.
+
+# Referenzen
